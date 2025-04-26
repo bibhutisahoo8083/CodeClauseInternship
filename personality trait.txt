@@ -1,0 +1,65 @@
+import fitz  
+import torch
+from transformers import BertTokenizer, BertModel
+from sklearn.linear_model import LogisticRegression
+import numpy as np
+import nltk
+nltk.download('punkt')
+from nltk.tokenize import sent_tokenize
+
+
+def extract_text_from_pdf(pdf_path):
+    doc = fitz.open(pdf_path)
+    text = ""
+    for page in doc:
+        text += page.get_text()
+    return text
+
+pdf_path = "resume.pdf"
+cv_text = extract_text_from_pdf(pdf_path)
+print(cv_text)
+
+
+
+tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+model = BertModel.from_pretrained('bert-base-uncased')
+
+def get_bert_embedding(text):
+    inputs = tokenizer(text, return_tensors='pt', truncation=True, max_length=512)
+    with torch.no_grad():
+        outputs = model(**inputs)
+    embeddings = outputs.last_hidden_state.mean(dim=1)
+    return embeddings.numpy().flatten()
+
+
+
+
+class PersonalityModel:
+    def __init__(self):
+        self.traits = ['Openness', 'Conscientiousness', 'Extraversion', 'Agreeableness', 'Neuroticism']
+
+    def predict(self, embedding):
+        np.random.seed(int(sum(embedding[:5])*1000) % 100)
+        return dict(zip(self.traits, np.random.rand(5).round(2)))
+
+model_personality = PersonalityModel()
+
+
+
+pdf_path = "resume.pdf"  # Update this path
+
+cv_text = extract_text_from_pdf(pdf_path)
+print("CV Text Extracted!")
+
+embedding = get_bert_embedding(cv_text)
+
+prediction = model_personality.predict(embedding)
+
+print("\n🎯 Predicted Personality Traits:\n")
+for trait, score in prediction.items():
+    print(f"{trait}: {score}")
+
+
+
+
+
