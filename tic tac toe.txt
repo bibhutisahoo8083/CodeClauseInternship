@@ -1,30 +1,76 @@
-from ultralytics import YOLO
-import cv2
-from matplotlib import pyplot as plt
+# Tic Tac Toe Game in Python
 
-model = YOLO("yolov8n.pt")  # You can also try yolov5s.pt if preferred
+BOARD_SIZE = 3
 
-image_path = "C:/Users/Bhoomika/Pictures/istockphoto-1138722351-612x612.jpg"  # Change this to your image name or path
-img = cv2.imread(image_path)
+def print_board(board):
+    print("\n   0   1   2")
+    for i, row in enumerate(board):
+        print(f"{i}  " + " | ".join(row))
+        if i < BOARD_SIZE - 1:
+            print("  " + "-" * 9)
+    print()
 
-if img is None:
-    print("Image not found. Check the path!")
-else:
-    print("Image loaded successfully")
+def check_winner(board, player):
+    # Check rows and columns
+    for i in range(BOARD_SIZE):
+        if all(cell == player for cell in board[i]) or \
+           all(board[j][i] == player for j in range(BOARD_SIZE)):
+            return True
 
+    # Check diagonals
+    if all(board[i][i] == player for i in range(BOARD_SIZE)) or \
+       all(board[i][BOARD_SIZE - 1 - i] == player for i in range(BOARD_SIZE)):
+        return True
 
+    return False
 
+def is_full(board):
+    return all(cell in ['X', 'O'] for row in board for cell in row)
 
+def get_valid_move(board, player):
+    while True:
+        try:
+            row = int(input(f"Player {player}, enter row (0-2): "))
+            col = int(input(f"Player {player}, enter column (0-2): "))
+            if row in range(BOARD_SIZE) and col in range(BOARD_SIZE):
+                if board[row][col] == " ":
+                    return row, col
+                else:
+                    print("❌ Cell already taken. Try again.")
+            else:
+                print("❌ Invalid row or column. Must be 0, 1, or 2.")
+        except ValueError:
+            print("❌ Invalid input. Please enter numbers only.")
 
-results = model(img)
+def play_game():
+    board = [[" " for _ in range(BOARD_SIZE)] for _ in range(BOARD_SIZE)]
+    current_player = "X"
 
-annotated_img = results[0].plot()
+    print("🎮 Welcome to Tic-Tac-Toe!")
+    print_board(board)
 
-annotated_img = cv2.cvtColor(annotated_img, cv2.COLOR_BGR2RGB)
+    while True:
+        row, col = get_valid_move(board, current_player)
+        board[row][col] = current_player
+        print_board(board)
 
-plt.figure(figsize=(10, 6))
-plt.imshow(annotated_img)
-plt.axis("off")
-plt.title("Detected Objects")
-plt.show()
+        if check_winner(board, current_player):
+            print(f"🎉 Player {current_player} wins!\n")
+            break
+        elif is_full(board):
+            print("🤝 It's a draw!\n")
+            break
 
+        # Switch player
+        current_player = "O" if current_player == "X" else "X"
+
+def main():
+    while True:
+        play_game()
+        replay = input("Do you want to play again? (y/n): ").lower()
+        if replay != 'y':
+            print("👋 Thanks for playing!")
+            break
+
+if __name__ == "__main__":
+    main()
