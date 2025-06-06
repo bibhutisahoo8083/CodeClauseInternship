@@ -1,5 +1,3 @@
-# Tic Tac Toe Game in Python
-
 BOARD_SIZE = 3
 
 def print_board(board):
@@ -11,13 +9,10 @@ def print_board(board):
     print()
 
 def check_winner(board, player):
-    # Check rows and columns
     for i in range(BOARD_SIZE):
         if all(cell == player for cell in board[i]) or \
            all(board[j][i] == player for j in range(BOARD_SIZE)):
             return True
-
-    # Check diagonals
     if all(board[i][i] == player for i in range(BOARD_SIZE)) or \
        all(board[i][BOARD_SIZE - 1 - i] == player for i in range(BOARD_SIZE)):
         return True
@@ -60,8 +55,6 @@ def play_game():
         elif is_full(board):
             print("🤝 It's a draw!\n")
             break
-
-        # Switch player
         current_player = "O" if current_player == "X" else "X"
 
 def main():
